@@ -1,28 +1,31 @@
-GIT_DL_LINK := https://github.com/tensorflow/tensorflow.git
+dl_link := https://github.com/tensorflow/tensorflow/archive/
+dl_file := v0.9.0.zip
+unzip_dir := tensorflow
 
 default_target: all
 
-all: tensorflow/bazel-bin
+all: $(unzip_dir)/bazel-bin
 
-.PRECIOUS: tensorflow/bazel-bin
-tensorflow/bazel-bin:
+.PRECIOUS: $(unzip_dir)/bazel-bin
+$(unzip_dir)/bazel-bin:
 	$(MAKE) configure
-	@cd tensorflow && \
+	@cd $(unzip_dir) && \
 		bazel build -c opt //tensorflow/cc:tutorials_example/trainer
 
 .PRECIOUS: configure
-configure: tensorflow/configure
-	@cd tensorflow && \
+configure: $(unzip_dir)/configure
+	@cd $(unzip_dir) && \
 		TF_NEED_GCP=0 TF_NEED_CUDA=0 \
 		PYTHON_BIN_PATH=`which python` \
 		SWIG_PATH=/usr/bin/swig \
 			./configure
 
-.PRECIOUS: tensorflow/configure
-tensorflow/configure:
+.PRECIOUS: $(unzip_dir)/configure
+$(unzip_dir)/configure:
 	@echo "\nDownloading tensorflow \n\n"
-	git clone $(GIT_DL_LINK)
-	@cd tensorflow && git tag tags/v0.9.0
+	wget -T 60 $(dl_link)/$(dl_file) -O $(dl_file)
+	@echo "\nUnzipping to $(unzip_dir) \n\n"
+	unzip $(dl_file) && rm $(dl_file)
 
 clean:
-	@cd tensorflow && bazel --clean expunge
+	@cd $(unzip_dir) && bazel --clean expunge
