@@ -7,7 +7,8 @@ all: tensorflow/bazel-bin
 .PRECIOUS: tensorflow/bazel-bin
 tensorflow/bazel-bin:
 	$(MAKE) configure
-	@cd tensorflow && bazel build -c opt //tensorflow/cc:tutorials_example/trainer
+	@cd tensorflow && \
+		bazel build -c opt //tensorflow/cc:tutorials_example/trainer
 
 .PRECIOUS: configure
 configure: tensorflow/configure
@@ -21,7 +22,7 @@ configure: tensorflow/configure
 tensorflow/configure:
 	@echo "\nDownloading tensorflow \n\n"
 	git clone $(GIT_DL_LINK)
-	git apply ../patch.diff
-	
+	@cd tensorflow && git tag tags/v0.9.0
+
 clean:
 	@cd tensorflow && bazel --clean expunge
