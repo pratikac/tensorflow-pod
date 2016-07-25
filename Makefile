@@ -10,7 +10,7 @@ all: $(unzip_dir)/bazel-bin
 $(unzip_dir)/bazel-bin:
 	$(MAKE) configure
 	@cd $(unzip_dir) && \
-		bazel build -c opt //tensorflow/cc:tutorials_example/trainer
+		bazel build -c opt //tensorflow/cc:tutorials_example_trainer
 
 .PRECIOUS: configure
 configure: $(unzip_dir)/configure
@@ -25,7 +25,7 @@ $(unzip_dir)/configure:
 	@echo "\nDownloading tensorflow \n\n"
 	wget -T 60 $(dl_link)/$(dl_file) -O $(dl_file)
 	@echo "\nUnzipping to $(unzip_dir) \n\n"
-	unzip $(dl_file) && rm $(dl_file)
+	unzip $(dl_file) && rm $(dl_file) && mv tensorflow-0.9.0 $(unzip_dir)
 
 clean:
 	@cd $(unzip_dir) && bazel --clean expunge
