@@ -21,6 +21,7 @@ configure: tensorflow/configure
 tensorflow/configure:
 	@echo "\nDownloading tensorflow \n\n"
 	git clone $(GIT_DL_LINK)
+	git apply ../patch.diff
 	
 clean:
 	@cd tensorflow && bazel --clean expunge
