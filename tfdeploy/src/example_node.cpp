@@ -19,7 +19,26 @@ using namespace cv;
 using namespace std;
 using namespace std::chrono;
 
+
+class tt_t
+{
+    private:
+        high_resolution_clock::time_point start, end;
+
+    public:
+        void tic()
+        {
+            start = high_resolution_clock::now();
+        }
+        double toc()
+        {
+            end = high_resolution_clock::now();
+            return duration_cast<duration<double>>(end - start).count();
+        }
+};
+
 // get k largest elements of arg in (wt, idx)
+// sigh C
 void get_k_largest(int k, vector<float>& arg, vector<float>& wt, vector<int>& idx)
 {
     struct comp_t
@@ -79,9 +98,11 @@ int main(int argc, char* argv[])
         vector<Mat> x = {m};
         vector<float> y;
 
-        high_resolution_clock::time_point t1 = high_resolution_clock::now();
+        tt_t tt;
+        tt.tic();
+
         tf.run_network(x, y);
-        high_resolution_clock::time_point t2 = high_resolution_clock::now();
+        printf("dt: %.3f [ms]\n", tt.toc()*1000);
 
         vector<float> tmp;
         vector<int> idx;
@@ -89,7 +110,6 @@ int main(int argc, char* argv[])
         for(int i=0; i<5; i++)
             printf("%d [%d, %.3f]\n", i, idx[i], tmp[i]);
 
-        printf("dt: %.3f [ms]\n", duration_cast<duration<double>>(t2 - t1).count()*1000);
     }
     return 0;
 }
