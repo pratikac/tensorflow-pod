@@ -10,8 +10,37 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include <iostream>
+#include <ctime>
+#include <ratio>
+#include <chrono>
+
 using namespace cv;
 using namespace std;
+using namespace std::chrono;
+
+// get k largest elements of arg in (wt, idx)
+void get_k_largest(int k, vector<float>& arg, vector<float>& wt, vector<int>& idx)
+{
+    struct comp_t
+    {
+        comp_t(const vector<float>& v) : _v(v) {}
+        bool operator()(float a, float b) {return _v[a] > _v[b];}
+        const vector<float>& _v;
+    };
+
+    idx.resize(arg.size());
+    for(size_t i=0; i<idx.size(); i++)
+        idx[i] = i;
+
+    partial_sort(idx.begin(), idx.begin() + k, idx.end(), comp_t(arg));
+    
+    wt.clear();
+    wt.resize(k);
+    idx.resize(k);
+    for(size_t i=0; i<idx.size(); i++)
+        wt[i] = arg[idx[i]];
+}
 
 int main(int argc, char* argv[])
 {
@@ -44,17 +73,23 @@ int main(int argc, char* argv[])
             (char*)"Mul", xsz, xmean, xstd,
             (char*)"softmax", ysz);
 
+
     for(int i=0; i<100; i++)
     {
         vector<Mat> x = {m};
         vector<float> y;
 
+        high_resolution_clock::time_point t1 = high_resolution_clock::now();
         tf.run_network(x, y);
-        for(auto& yi : y)
-            printf("%.3f ", yi);
-        printf("\n");
-        
-        printf("class idx: [%d]\n", distance(y.begin(), max_element(y.begin(), y.end())));
+        high_resolution_clock::time_point t2 = high_resolution_clock::now();
+
+        vector<float> tmp;
+        vector<int> idx;
+        get_k_largest(5, y, tmp, idx);
+        for(int i=0; i<5; i++)
+            printf("%d [%d, %.3f]\n", i, idx[i], tmp[i]);
+
+        printf("dt: %.3f [ms]\n", duration_cast<duration<double>>(t2 - t1).count()*1000);
     }
     return 0;
 }
